@@ -1,5 +1,5 @@
 //
-//  ViewController.swift
+//  OpenImageController.swift
 //  Gallery
 //
 //  Created by Camilo Cabana on 21/07/20.
@@ -8,13 +8,11 @@
 
 import UIKit
 
-class ViewController: UIViewController {
+class OpenImageController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        // Do any additional setup after loading the view.
+        view.backgroundColor = .red
     }
 
-
 }
-
