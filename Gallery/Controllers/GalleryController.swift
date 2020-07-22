@@ -48,8 +48,15 @@ class GalleryController: UIViewController {
     func setNavigationBar() {
         navigationItem.title = "Home"
         navigationController?.navigationBar.barTintColor = .white
-        navigationController?.navigationBar.prefersLargeTitles = true
     }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        navigationController?.navigationBar.prefersLargeTitles = false
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+           navigationController?.navigationBar.prefersLargeTitles = true
+       }
 }
 
 extension GalleryController: UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout{
@@ -76,7 +83,10 @@ extension GalleryController: UICollectionViewDelegate, UICollectionViewDataSourc
     }
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        navigationController?.pushViewController(OpenImageController(), animated: true)
+        let openImageController = OpenImageController()
+        openImageController.itemsViewModel = gallery?.items.map({return ItemViewModel(item: $0)}) ?? []
+        openImageController.index = indexPath
+        navigationController?.pushViewController(openImageController, animated: true)
     }
     
     func setCollectionView() {

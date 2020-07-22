@@ -7,7 +7,7 @@
 //
 
 import UIKit
-let imageCache = NSCache<NSString, UIImage>()
+private let imageCache = NSCache<NSString, UIImage>()
 
 extension UIImageView {
     
