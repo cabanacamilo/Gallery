@@ -9,8 +9,9 @@
 import UIKit
 
 class GalleryController: UIViewController {
-    var gallery: Gallery?
     let cellId = "GalleryCell"
+    var filteredItems = [ItemViewModel]()
+    var items = [ItemViewModel]()
     
     let galleryCollectionView: UICollectionView = {
         let layout = UICollectionViewFlowLayout()
@@ -18,6 +19,17 @@ class GalleryController: UIViewController {
         collectionView.translatesAutoresizingMaskIntoConstraints = false
         collectionView.backgroundColor = .white
         return collectionView
+    }()
+    
+    lazy var tagSearchBarContoller: UISearchController = {
+        let searchBar = UISearchController(searchResultsController: nil)
+        searchBar.searchBar.placeholder = "Search country"
+        searchBar.searchBar.sizeToFit()
+        searchBar.searchBar.searchBarStyle = .prominent
+        searchBar.searchBar.searchTextField.backgroundColor = .white
+        searchBar.searchBar.delegate = self
+        searchBar.obscuresBackgroundDuringPresentation = false
+        return searchBar
     }()
     
     override func viewDidLoad() {
@@ -34,7 +46,8 @@ class GalleryController: UIViewController {
                 print(error)
                 return
             }
-            self?.gallery = gallery
+            self?.items = gallery?.items.map({return ItemViewModel(item: $0)}) ?? []
+            self?.filteredItems = self?.items ?? []
             self?.galleryCollectionView.reloadData()
         }
     }
@@ -48,25 +61,19 @@ class GalleryController: UIViewController {
     func setNavigationBar() {
         navigationItem.title = "Home"
         navigationController?.navigationBar.barTintColor = .white
+        navigationItem.searchController = tagSearchBarContoller
+        navigationController?.navigationBar.prefersLargeTitles = true
     }
-    
-    override func viewWillDisappear(_ animated: Bool) {
-        navigationController?.navigationBar.prefersLargeTitles = false
-    }
-    
-    override func viewWillAppear(_ animated: Bool) {
-           navigationController?.navigationBar.prefersLargeTitles = true
-       }
 }
 
 extension GalleryController: UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout{
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return gallery?.items.count ?? 0
+        return filteredItems.count
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: cellId, for: indexPath) as! GalleryCell
-        cell.item = gallery?.items[indexPath.row]
+        cell.item = filteredItems[indexPath.row]
         return cell
     }
     
@@ -84,8 +91,7 @@ extension GalleryController: UICollectionViewDelegate, UICollectionViewDataSourc
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         let openImageController = OpenImageController()
-        openImageController.itemsViewModel = gallery?.items.map({return ItemViewModel(item: $0)}) ?? []
-        openImageController.index = indexPath
+        openImageController.item = filteredItems[indexPath.row]
         navigationController?.pushViewController(openImageController, animated: true)
     }
     
@@ -94,5 +100,33 @@ extension GalleryController: UICollectionViewDelegate, UICollectionViewDataSourc
         galleryCollectionView.dataSource = self
         galleryCollectionView.register(GalleryCell.self, forCellWithReuseIdentifier: cellId)
         galleryCollectionView.contentInset = UIEdgeInsets(top: 5, left: 5, bottom: 5, right: 5)
+    }
+}
+
+extension GalleryController: UISearchBarDelegate {
+    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
+        guard !searchText.isEmpty else {
+            filteredItems = items
+            galleryCollectionView.reloadData()
+            return
+        }
+        filteredItems = items.filter({ (item) -> Bool in
+            guard let text = searchBar.text else { return false }
+            return item.tags.lowercased().contains(text.lowercased())
+        })
+        galleryCollectionView.reloadData()
+    }
+
+    func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
+        filteredItems = items
+        galleryCollectionView.reloadData()
+    }
+
+    func searchBarTextDidEndEditing(_ searchBar: UISearchBar) {
+        if filteredItems.count == 0 {
+            filteredItems = items
+            galleryCollectionView.reloadData()
+            searchBar.text = ""
+        }
     }
 }

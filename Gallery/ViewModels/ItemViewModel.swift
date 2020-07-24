@@ -15,6 +15,7 @@ struct ItemViewModel {
     let dateTaken: String
     let datePublished: String
     let description: String
+    let tags: String
     init(item: Item) {
         self.title = item.title
         self.author = item.author
@@ -26,5 +27,6 @@ struct ItemViewModel {
         let datePublished = item.published.stringToDate()
         self.datePublished = date.string(from: datePublished)
         self.description = item.description
+        self.tags = item.tags
     }
 }

@@ -10,9 +10,9 @@ import UIKit
 
 class GalleryCell: UICollectionViewCell {
     
-    var item: Item! {
+    var item: ItemViewModel! {
         didSet {
-            galleryImage.loadCacheImage(url: item.media.m)
+            galleryImage.loadCacheImage(url: item.image)
         }
     }
     

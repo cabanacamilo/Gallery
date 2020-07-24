@@ -10,7 +10,6 @@ import UIKit
 private let imageCache = NSCache<NSString, UIImage>()
 
 extension UIImageView {
-    
     func loadCacheImage(url: String) {
         self.image = nil
         if let cahedImage = imageCache.object(forKey: url as NSString) {
