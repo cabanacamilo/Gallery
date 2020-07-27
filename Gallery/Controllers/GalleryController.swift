@@ -21,6 +21,15 @@ class GalleryController: UIViewController {
         return collectionView
     }()
     
+    let errorMessageLabel: UILabel = {
+        let label = UILabel()
+        label.textAlignment = .center
+        label.numberOfLines = 3
+        label.isHidden = true
+        label.translatesAutoresizingMaskIntoConstraints = false
+        return label
+    }()
+    
     lazy var tagSearchBarContoller: UISearchController = {
         let searchBar = UISearchController(searchResultsController: nil)
         searchBar.searchBar.placeholder = "Search country"
@@ -43,7 +52,8 @@ class GalleryController: UIViewController {
     fileprivate func fetchData() {
         Service.shared.fetchCourses { [weak self] (gallery, error) in
             if let error = error {
-                print(error)
+                self?.errorMessageLabel.text = error.localizedDescription
+                self?.errorMessageLabel.isHidden = false
                 return
             }
             self?.items = gallery?.items.map({return ItemViewModel(item: $0)}) ?? []
@@ -55,7 +65,10 @@ class GalleryController: UIViewController {
     func setLayout() {
         view.backgroundColor = .white
         view.addSubview(galleryCollectionView)
-        NSLayoutConstraint.activate([galleryCollectionView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor), galleryCollectionView.leadingAnchor.constraint(equalTo: view.leadingAnchor), galleryCollectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor), galleryCollectionView.bottomAnchor.constraint(equalTo: view.bottomAnchor)])
+        view.addSubview(errorMessageLabel)
+        NSLayoutConstraint.activate([
+            galleryCollectionView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor), galleryCollectionView.leadingAnchor.constraint(equalTo: view.leadingAnchor), galleryCollectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor), galleryCollectionView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+            errorMessageLabel.centerYAnchor.constraint(equalTo: view.centerYAnchor), errorMessageLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor), errorMessageLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor)])
     }
     
     func setNavigationBar() {
