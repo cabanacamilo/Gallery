@@ -127,9 +127,9 @@ class OpenImageController: UIViewController {
     
     @objc func image(_ image: UIImage, didFinishSavingWithError error: Error?, contextInfo: UnsafeRawPointer) {
         if let error = error {
-            CostumizeAlert.costumizeAlert.alert(self, title: "System", message: error.localizedDescription)
+            CostumizeAlert.alert(self, title: "System", message: error.localizedDescription)
         } else {
-            CostumizeAlert.costumizeAlert.alert(self, title: "The image has saved in the photo labrary", message: nil)
+            CostumizeAlert.alert(self, title: "The image has saved in the photo labrary", message: nil)
         }
     }
 }
@@ -139,11 +139,10 @@ extension OpenImageController: MFMailComposeViewControllerDelegate {
         if MFMailComposeViewController.canSendMail() {
             let mail = MFMailComposeViewController()
             mail.mailComposeDelegate = self
-            mail.setToRecipients(["you@yoursite.com"])
             mail.addAttachmentData(galleryImage.image?.pngData() ?? Data(), mimeType: "image/png", fileName: "imageName.png")
             present(mail, animated: true)
         } else {
-            CostumizeAlert.costumizeAlert.alert(self, title: "System", message: "the app could not send the email")
+            CostumizeAlert.alert(self, title: "System", message: "the app could not send the email")
         }
     }
     

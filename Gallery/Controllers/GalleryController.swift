@@ -85,7 +85,7 @@ class GalleryController: UIViewController {
     }
     
     @objc func showFilter() {
-        FilterView.filterView.setLayout(self)
+        FilterView.setFilterView(self)
     }
 }
 

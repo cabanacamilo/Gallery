@@ -9,9 +9,7 @@
 import UIKit
 
 class FilterView {
-    static let filterView = FilterView()
-    
-    func setLayout(_ vc: GalleryController) {
+    static func setFilterView(_ vc: GalleryController) {
         let alert = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
         let actionSortedByPublished = UIAlertAction(title: "By Published", style: .default) { [weak vc] (_) in
             vc?.filteredItemsViewModel.sort { $0.datePublished < $1.datePublished }
