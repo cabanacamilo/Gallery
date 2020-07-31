@@ -12,20 +12,22 @@ struct ItemViewModel {
     let title: String
     let author: String
     let image: String
-    let dateTaken: String
-    let datePublished: String
+    let dateTakenString: String
+    let datePublishedString: String
     let description: String
     let tags: String
+    let dateTaken: Date
+    let datePublished: Date
     init(item: Item) {
         self.title = item.title
         self.author = item.author
         self.image = item.media.m
-        let dateTaken = item.date_taken.stringToDate()
+        self.dateTaken = item.date_taken.stringToDate()
         let date = DateFormatter()
         date.dateFormat = "MMM d, yyyy"
-        self.dateTaken = date.string(from: dateTaken)
-        let datePublished = item.published.stringToDate()
-        self.datePublished = date.string(from: datePublished)
+        self.dateTakenString = date.string(from: dateTaken)
+        self.datePublished = item.published.stringToDate()
+        self.datePublishedString = date.string(from: datePublished)
         self.description = item.description
         self.tags = item.tags
     }

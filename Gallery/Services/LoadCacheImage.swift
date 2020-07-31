@@ -18,8 +18,7 @@ extension UIImageView {
         }
         if let imageUrl = URL(string: url) {
             URLSession.shared.dataTask(with: imageUrl, completionHandler: { (data, response, error) in
-                if let error = error {
-                    print(error)
+                if error != nil {
                     return
                 }
                 if let data = data {

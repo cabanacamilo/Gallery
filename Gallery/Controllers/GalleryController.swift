@@ -10,8 +10,8 @@ import UIKit
 
 class GalleryController: UIViewController {
     let cellId = "GalleryCell"
-    var filteredItems = [ItemViewModel]()
-    var items = [ItemViewModel]()
+    var filteredItemsViewModel = [ItemViewModel]()
+    var itemsViewModel = [ItemViewModel]()
     
     let galleryCollectionView: UICollectionView = {
         let layout = UICollectionViewFlowLayout()
@@ -28,6 +28,11 @@ class GalleryController: UIViewController {
         label.isHidden = true
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
+    }()
+    
+    lazy var filterButton: UIBarButtonItem = {
+        let button = UIBarButtonItem(title: "Filter", style: .plain, target: self, action: #selector(showFilter))
+        return button
     }()
     
     lazy var tagSearchBarContoller: UISearchController = {
@@ -56,8 +61,8 @@ class GalleryController: UIViewController {
                 self?.errorMessageLabel.isHidden = false
                 return
             }
-            self?.items = gallery?.items.map({return ItemViewModel(item: $0)}) ?? []
-            self?.filteredItems = self?.items ?? []
+            self?.itemsViewModel = gallery?.items.map({return ItemViewModel(item: $0)}) ?? []
+            self?.filteredItemsViewModel = self?.itemsViewModel ?? []
             self?.galleryCollectionView.reloadData()
         }
     }
@@ -76,17 +81,22 @@ class GalleryController: UIViewController {
         navigationController?.navigationBar.barTintColor = .white
         navigationItem.searchController = tagSearchBarContoller
         navigationController?.navigationBar.prefersLargeTitles = true
+        navigationItem.rightBarButtonItem = filterButton
+    }
+    
+    @objc func showFilter() {
+        FilterView.filterView.setLayout(self)
     }
 }
 
 extension GalleryController: UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout{
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return filteredItems.count
+        return filteredItemsViewModel.count
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: cellId, for: indexPath) as! GalleryCell
-        cell.item = filteredItems[indexPath.row]
+        cell.item = filteredItemsViewModel[indexPath.row]
         return cell
     }
     
@@ -104,7 +114,7 @@ extension GalleryController: UICollectionViewDelegate, UICollectionViewDataSourc
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         let openImageController = OpenImageController()
-        openImageController.item = filteredItems[indexPath.row]
+        openImageController.item = filteredItemsViewModel[indexPath.row]
         navigationController?.pushViewController(openImageController, animated: true)
     }
     
@@ -119,11 +129,11 @@ extension GalleryController: UICollectionViewDelegate, UICollectionViewDataSourc
 extension GalleryController: UISearchBarDelegate {
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
         guard !searchText.isEmpty else {
-            filteredItems = items
+            filteredItemsViewModel = itemsViewModel
             galleryCollectionView.reloadData()
             return
         }
-        filteredItems = items.filter({ (item) -> Bool in
+        filteredItemsViewModel = itemsViewModel.filter({ (item) -> Bool in
             guard let text = searchBar.text else { return false }
             return item.tags.lowercased().contains(text.lowercased())
         })
@@ -131,13 +141,13 @@ extension GalleryController: UISearchBarDelegate {
     }
 
     func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
-        filteredItems = items
+        filteredItemsViewModel = itemsViewModel
         galleryCollectionView.reloadData()
     }
 
     func searchBarTextDidEndEditing(_ searchBar: UISearchBar) {
-        if filteredItems.count == 0 {
-            filteredItems = items
+        if filteredItemsViewModel.count == 0 {
+            filteredItemsViewModel = itemsViewModel
             galleryCollectionView.reloadData()
             searchBar.text = ""
         }

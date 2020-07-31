@@ -7,18 +7,17 @@
 //
 
 import UIKit
+import MessageUI
 
 class OpenImageController: UIViewController {
     var item: ItemViewModel! {
         didSet {
             galleryImage.loadCacheImage(url: item.image)
             authorLabel.text = item.author
-            dateTakenLabel.text = item.dateTaken
+            dateTakenLabel.text = item.dateTakenString
             descriptionText.text = item.description
-            datePublishedLabel.text = item.datePublished
-            navigationItem.title = item.title
-            let height = sizeForMessage(item.description).height + 500
-            cellView.heightAnchor.constraint(equalToConstant: height).isActive = true
+            datePublishedLabel.text = item.datePublishedString
+            cellView.heightAnchor.constraint(equalToConstant: sizeForView(item.description).height + 500).isActive = true
         }
     }
     
@@ -74,10 +73,21 @@ class OpenImageController: UIViewController {
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
     }()
+    
+    lazy var emailButton: UIBarButtonItem = {
+        let button = UIBarButtonItem(title: "Email", style: .plain, target: self, action: #selector(sendByEmail))
+        return button
+    }()
+    
+    lazy var saveButton: UIBarButtonItem = {
+        let button = UIBarButtonItem(title: "Save", style: .plain, target: self, action: #selector(saveImage))
+        return button
+    }()
 
     override func viewDidLoad() {
         super.viewDidLoad()
         setLayout()
+        setNavigationBar()
     }
     
     func setLayout() {
@@ -100,9 +110,44 @@ class OpenImageController: UIViewController {
             descriptionText.topAnchor.constraint(equalTo: dateTakenLabel.bottomAnchor, constant: 10), descriptionText.leadingAnchor.constraint(equalTo: cellView.leadingAnchor, constant: 10), descriptionText.trailingAnchor.constraint(equalTo: cellView.trailingAnchor, constant: -10), datePublishedLabel.bottomAnchor.constraint(equalTo: cellView.bottomAnchor, constant: -10), datePublishedLabel.leadingAnchor.constraint(equalTo: cellView.leadingAnchor, constant: 10), datePublishedLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -10)])
     }
     
-    func sizeForMessage(_ text: String) -> CGRect {
+    func setNavigationBar() {
+        navigationItem.title = item.title
+        navigationItem.rightBarButtonItems = [emailButton, saveButton]
+    }
+    
+    func sizeForView(_ text: String) -> CGRect {
         let size = CGSize(width: view.frame.width, height: 9999)
         let options = NSStringDrawingOptions.usesFontLeading.union(.usesLineFragmentOrigin)
         return NSString(string: text).boundingRect(with: size, options: options, attributes: [NSAttributedString.Key.font: UIFont.systemFont(ofSize: 15)], context: .none)
+    }
+    
+    @objc func saveImage() {
+        UIImageWriteToSavedPhotosAlbum(galleryImage.image ?? UIImage(), self, #selector(image(_:didFinishSavingWithError:contextInfo:)), nil)
+    }
+    
+    @objc func image(_ image: UIImage, didFinishSavingWithError error: Error?, contextInfo: UnsafeRawPointer) {
+        if let error = error {
+            CostumizeAlert.costumizeAlert.alert(self, title: "System", message: error.localizedDescription)
+        } else {
+            CostumizeAlert.costumizeAlert.alert(self, title: "The image has saved in the photo labrary", message: nil)
+        }
+    }
+}
+
+extension OpenImageController: MFMailComposeViewControllerDelegate {
+    @objc func sendByEmail() {
+        if MFMailComposeViewController.canSendMail() {
+            let mail = MFMailComposeViewController()
+            mail.mailComposeDelegate = self
+            mail.setToRecipients(["you@yoursite.com"])
+            mail.addAttachmentData(galleryImage.image?.pngData() ?? Data(), mimeType: "image/png", fileName: "imageName.png")
+            present(mail, animated: true)
+        } else {
+            CostumizeAlert.costumizeAlert.alert(self, title: "System", message: "the app could not send the email")
+        }
+    }
+    
+    func mailComposeController(_ controller: MFMailComposeViewController, didFinishWith result: MFMailComposeResult, error: Error?) {
+        controller.dismiss(animated: true)
     }
 }
