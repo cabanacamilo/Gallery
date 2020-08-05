@@ -12,23 +12,9 @@ class GalleryController: UIViewController {
     let cellId = "GalleryCell"
     var filteredItemsViewModel = [ItemViewModel]()
     var itemsViewModel = [ItemViewModel]()
-    
-    let galleryCollectionView: UICollectionView = {
-        let layout = UICollectionViewFlowLayout()
-        let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
-        collectionView.translatesAutoresizingMaskIntoConstraints = false
-        collectionView.backgroundColor = .white
-        return collectionView
-    }()
-    
-    let errorMessageLabel: UILabel = {
-        let label = UILabel()
-        label.textAlignment = .center
-        label.numberOfLines = 3
-        label.isHidden = true
-        label.translatesAutoresizingMaskIntoConstraints = false
-        return label
-    }()
+    var galleryView = GalleryView()
+    weak var galleryCollectionView: UICollectionView!
+    weak var errorMessageLabel: UILabel!
     
     lazy var filterButton: UIBarButtonItem = {
         let button = UIBarButtonItem(title: "Filter", style: .plain, target: self, action: #selector(showFilter))
@@ -37,7 +23,7 @@ class GalleryController: UIViewController {
     
     lazy var tagSearchBarContoller: UISearchController = {
         let searchBar = UISearchController(searchResultsController: nil)
-        searchBar.searchBar.placeholder = "Search country"
+        searchBar.searchBar.placeholder = "Search tag"
         searchBar.searchBar.sizeToFit()
         searchBar.searchBar.searchBarStyle = .prominent
         searchBar.searchBar.searchTextField.backgroundColor = .white
@@ -48,7 +34,6 @@ class GalleryController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        setLayout()
         setCollectionView()
         fetchData()
         setNavigationBar()
@@ -67,13 +52,10 @@ class GalleryController: UIViewController {
         }
     }
     
-    func setLayout() {
-        view.backgroundColor = .white
-        view.addSubview(galleryCollectionView)
-        view.addSubview(errorMessageLabel)
-        NSLayoutConstraint.activate([
-            galleryCollectionView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor), galleryCollectionView.leadingAnchor.constraint(equalTo: view.leadingAnchor), galleryCollectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor), galleryCollectionView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
-            errorMessageLabel.centerYAnchor.constraint(equalTo: view.centerYAnchor), errorMessageLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor), errorMessageLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor)])
+    override func loadView() {
+        self.galleryCollectionView = galleryView.galleryCollectionView
+        self.errorMessageLabel = galleryView.errorMessageLabel
+        view = galleryView
     }
     
     func setNavigationBar() {
