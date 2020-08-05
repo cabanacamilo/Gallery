@@ -9,7 +9,6 @@
 import UIKit
 
 class GalleryCell: UICollectionViewCell {
-    
     var item: ItemViewModel! {
         didSet {
             galleryImage.loadCacheImage(url: item.image)
